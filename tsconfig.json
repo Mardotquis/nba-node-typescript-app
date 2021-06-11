@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "lib": ["es2017"],
+    "module": "commonjs",
+    "types": ["node", "jest"],
+    "typeRoots": ["node_modules/@types"],
+    "esModuleInterop": true,
+    "inlineSourceMap": true,
+    "removeComments": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": false,
+    "incremental": true,
+    "watch": false,
+    "target": "es2017",
+    "outDir": "dist"
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": [
+    "node_modules/**/*",
+    "_warmup/**/*",
+    ".vscode/**/*",
+    "*.config.js",
+    "**/*.js",
+    "**/*.spec.ts"
+  ]
+}
