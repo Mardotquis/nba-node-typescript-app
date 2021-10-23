@@ -1,24 +1,13 @@
 import axios from "axios";
 import { gameDetail } from "./types";
-import { hideBin } from "yargs/helpers";
-import yargs from "yargs/yargs";
+import log from "./log";
 
-const GAME_URL =
+const BASE_GAME_URL =
   "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2020/scores";
 
 const gameAPI = axios.create({
-  baseURL: GAME_URL,
+  baseURL: BASE_GAME_URL,
 });
-
-const getGameID = (): number | null => {
-  const args = process.argv.slice(2);
-  console.log("🚀 ~ file: index.ts ~ line 31 ~ init ~ args", args);
-  if (!args.length) {
-    console.log("no args provided");
-    return;
-  }
-  const gameId = args.find((arg) => {});
-};
 
 const getGameDetails = async (gameId: number): Promise<gameDetail | null> => {
   if (!gameId) {
