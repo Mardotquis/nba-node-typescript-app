@@ -1,7 +1,6 @@
-import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 
-const argv = yargs(hideBin(process.argv))
+const argv = yargs(process.argv.slice(2))
   .scriptName("game-cli")
   .usage("$0 [args]")
   .option("verbose", {
@@ -11,7 +10,7 @@ const argv = yargs(hideBin(process.argv))
   })
   .option("gameId", {
     alias: "g",
-    type: "number",
+    type: "string",
     description: "Game ID",
     demandOption: true,
   })
