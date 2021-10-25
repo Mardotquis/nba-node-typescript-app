@@ -13,11 +13,12 @@ import axios from "axios";
 import fs from "fs";
 import log from "../util/log";
 
-const BASE_GAME_URL =
+const BASE_URL =
   "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2020/scores";
 
+// global axios instance with prepended URL
 export const gameAPI = axios.create({
-  baseURL: BASE_GAME_URL,
+  baseURL: BASE_URL,
 });
 
 gameAPI.interceptors.response.use(
@@ -42,7 +43,7 @@ export const getGameID = (): string | null => {
   return argv.gameId;
 };
 
-// Extracting this out incase we have to modify this later.
+// extracting this out incase we have to modify this later
 const formatGameDetailsResponse = (
   gameDetails: IRawGameDetailResponse
 ): IGameDetail => {
@@ -162,9 +163,15 @@ export const groupPlayerEvents = (
 };
 
 export const writePlayerEvents = (events: GroupedEvents) => {
+  if (!events) {
+    log.error(`No events provided to write.`);
+    return;
+  }
+
   const { gid } = events;
   const fileName = `player-events-${gid}.json`;
 
+  // asynchronously writing data to a file
   fs.writeFile(fileName, JSON.stringify(events), (err) => {
     if (err) {
       log.error(err, `Error while writing to file '${fileName}'`);
