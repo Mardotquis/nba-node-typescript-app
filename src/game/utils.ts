@@ -6,7 +6,7 @@ import {
   IPlayerEvents,
   IRawGameDetailResponse,
   IRawPlayByPlayResponse,
-} from "../types";
+} from "./types";
 
 import argv from "../util/argv";
 import axios from "axios";

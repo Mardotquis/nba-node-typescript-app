@@ -6,7 +6,7 @@ import {
   writePlayerEvents,
 } from "./utils";
 
-import { GroupedEvents } from "../types";
+import { GroupedEvents } from "./types";
 import log from "../util/log";
 
 export const run = async (): Promise<GroupedEvents> => {
