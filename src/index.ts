@@ -1,8 +1,16 @@
-import { IGameDetail } from "./types";
+import {
+  IGameDetail,
+  IPlayByPlayEvents,
+  IRawGameDetailResponse,
+  IRawPlayByPlayResponse,
+} from "./types";
+
 import argv from "./argv";
 import axios from "axios";
+import { combinePlayByPlayEvents } from "./utils";
 import log from "./log";
 
+log.info("Welcome to the game-cli: 🏀 75th Anniversary Edition 🏀!");
 log.debug(argv, "game-cli starting with the following args...");
 
 const BASE_GAME_URL =
@@ -19,9 +27,9 @@ gameAPI.interceptors.response.use(
     return response;
   },
   (responseError) => {
-    log.debug(responseError, `Error intercepted inside gameAPI.`);
+    log.debug(responseError, `gameAPI: error intercepted.`);
 
-    return responseError;
+    return Promise.reject(responseError);
   }
 );
 
@@ -34,26 +42,81 @@ const getGameID = (): string | null => {
   return argv.gameId;
 };
 
-const getGameDetails = async (gameId: string): Promise<IGameDetail | null> => {
+// Extracting this out incase we have to modify this later.
+const formatGameDetailsResponse = (
+  gameDetails: IRawGameDetailResponse
+): IGameDetail => {
+  if (!gameDetails.g) {
+    log.error("Game details response not formatted correctly.");
+    return null;
+  }
+
+  const { gid, p } = gameDetails.g;
+
+  return { gid, p };
+};
+
+const getGameDetails = async (gameId: string): Promise<IGameDetail | Error> => {
   try {
-    const response = await gameAPI.get<IGameDetail>(
+    const response = await gameAPI.get<IRawGameDetailResponse>(
       `/gamedetail/${gameId}_gamedetail.json`
     );
 
-    log.debug(response.data, `Game details response.`);
+    log.debug(response.data, "Game details response.");
     log.info(`Successfully fetched game details for ${gameId}!`);
 
-    return response.data;
+    return formatGameDetailsResponse(response.data);
   } catch (error) {
-    log.error(error, "Error while fetching game details.");
-    // throw?
+    const errMsg = "Error while fetching game details.";
+    log.error(error, errMsg);
+
+    return new Error(errMsg);
   }
 };
 
-const init = async () => {
-  const gameId = getGameID();
-  console.log("🚀 ~ file: index.ts ~ line 45 ~ init ~ gameId", gameId);
+const getPlayByPlayEvents = async (
+  gameDetails: IGameDetail
+): Promise<IPlayByPlayEvents> => {
+  if (!gameDetails.p) {
+    log.error(`No periods found for ${gameDetails.gid}`);
+    return;
+  }
 
+  const { p: periods, gid } = gameDetails;
+  let requests: Promise<IRawPlayByPlayResponse | null>[] = [];
+
+  // initially set up promise for each period
+  for (let curr = 1; curr <= periods; curr++) {
+    const request = gameAPI
+      .get<IRawPlayByPlayResponse>(`/pbp/${gid}_${curr}_pbp.json`)
+      .then((response) => {
+        log.debug(
+          `Successfully fetched play by play events for period '${curr}' in game '${gid}'!`
+        );
+
+        return response.data;
+      })
+      .catch((error) => {
+        const errMsg = `Error while fetching play by play events for period '${curr}' in game '${gid}'.`;
+        log.error(error, errMsg);
+
+        return null;
+      });
+
+    requests.push(request);
+  }
+
+  // make requests here concurrently since they don't rely on one another
+  const playByPlayEvents = await Promise.all(requests);
+  log.info(
+    `Requests finished for all '${periods}' periods of play by play events for game '${gid}'.`
+  );
+
+  return combinePlayByPlayEvents(playByPlayEvents, gid);
+};
+
+const run = async () => {
+  const gameId = getGameID();
   if (!gameId) {
     log.fatal("No gameID provided. Ending now...");
     return;
@@ -61,10 +124,22 @@ const init = async () => {
 
   try {
     const gameDetails = await getGameDetails(gameId);
+    if (gameDetails instanceof Error) {
+      log.fatal(gameDetails, "Unable to fetch game details. Ending now...");
+      return;
+    }
+
+    const playByPlayEvents = await getPlayByPlayEvents(gameDetails);
+    if (!playByPlayEvents.pla.length) {
+      log.fatal(
+        playByPlayEvents,
+        "No play by play events found. Ending now..."
+      );
+      return;
+    }
   } catch (error) {
-    log.error(error, "Error caught inside init func.");
-    // and catch?
+    log.fatal(error, "Error caught inside run func.");
   }
 };
 
-init();
+run();
