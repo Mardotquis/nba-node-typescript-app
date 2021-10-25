@@ -1,13 +1,25 @@
 // Details for a game.
 export interface IGameDetail {
+  gid: string; // Game ID
   p: number; // Period
 }
 
-export interface IPlayByPlayEvents {
-  pid: number; // Player ID
+export interface IRawGameDetailResponse {
+  g: IGameDetail;
 }
 
 // All events played in a single period.
-export interface IPlayByPlay {
-  pla: IPlayByPlayEvents[];
+export interface IPlayByPlayEvent {
+  pid: number; // Player ID
+}
+
+export interface IRawPlayByPlayResponse {
+  g: {
+    pla: IPlayByPlayEvent[];
+  };
+}
+
+export interface IPlayByPlayEvents {
+  gid: string;
+  pla: IPlayByPlayEvent[];
 }
