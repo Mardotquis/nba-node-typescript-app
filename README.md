@@ -10,12 +10,12 @@ Please follow the instructions below and complete the work to the best of your a
 
 ## Instructions
 
-1. Create a Node.js app which takes a `gameId` command line argument.
-2. Fetch the GameDetails json for the specified `gameId`.
-3. Use the GameDetail response to determine how many periods were played in that game  (`p`).
-4. For each period, fetch the corresponding PlayByPlay file.
-5. Once all PlayByPlay files have been received, group each of the events by their Player Id (`pid`).
-6. Write out the resulting object to a file called `./player-events.json`.
+1. ✅  Create a Node.js app which takes a `gameId` command line argument.
+2. ✅  Fetch the GameDetails json for the specified `gameId`.
+3. ✅  Use the GameDetail response to determine how many periods were played in that game  (`p`).
+4. ✅  For each period, fetch the corresponding PlayByPlay file.
+5. ✅  Once all PlayByPlay files have been received, group each of the events by their Player Id (`pid`).
+6. ✅  Write out the resulting object to a file called `./player-events.json`.
 
 ## Endpoints
 
