@@ -65,7 +65,7 @@ export const getGameDetails = async (
       `/gamedetail/${gameId}_gamedetail.json`
     );
 
-    log.info(`Successfully fetched game details for ${gameId}!`);
+    log.info(`Successfully fetched game details for game '${gameId}'!`);
 
     return formatGameDetailsResponse(response.data);
   } catch (error) {
