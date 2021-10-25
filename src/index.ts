@@ -1,14 +1,19 @@
 import {
+  GroupedEvents,
   IGameDetail,
+  IPlayByPlayEvent,
   IPlayByPlayEvents,
+  IPlayerEvents,
   IRawGameDetailResponse,
   IRawPlayByPlayResponse,
 } from "./types";
+import { combinePlayByPlayEvents, sortBy } from "./utils";
 
 import argv from "./argv";
 import axios from "axios";
-import { combinePlayByPlayEvents } from "./utils";
+import fs from "fs";
 import log from "./log";
+import { performance } from "perf_hooks";
 
 log.info("Welcome to the game-cli: 🏀 75th Anniversary Edition 🏀!");
 log.debug(argv, "game-cli starting with the following args...");
@@ -62,7 +67,6 @@ const getGameDetails = async (gameId: string): Promise<IGameDetail | Error> => {
       `/gamedetail/${gameId}_gamedetail.json`
     );
 
-    log.debug(response.data, "Game details response.");
     log.info(`Successfully fetched game details for ${gameId}!`);
 
     return formatGameDetailsResponse(response.data);
@@ -115,6 +119,36 @@ const getPlayByPlayEvents = async (
   return combinePlayByPlayEvents(playByPlayEvents, gid);
 };
 
+const groupPlayerEvents = (
+  playByPlayEvents: IPlayByPlayEvents
+): GroupedEvents => {
+  if (!playByPlayEvents.pla.length) {
+    log.error(`No player events to group.`);
+    return;
+  }
+
+  /*
+    loop through all events and set up needed player
+    arrays *once* to avoid unnecessary iterations
+  */
+  const playerEvents: IPlayerEvents = playByPlayEvents.pla.reduce(
+    (all, currVal) => {
+      // first check if this player has events recorded already
+      if (!all[currVal.pid]) {
+        // if not, start them a new array
+        all[currVal.pid] = [];
+      }
+
+      // update their either new or existing array with event
+      all[currVal.pid].push(currVal);
+      return all;
+    },
+    {}
+  );
+
+  return { gid: playByPlayEvents.gid, playerEvents };
+};
+
 const run = async () => {
   const gameId = getGameID();
   if (!gameId) {
@@ -137,6 +171,8 @@ const run = async () => {
       );
       return;
     }
+
+    const groupedEvents = groupPlayerEvents(playByPlayEvents);
   } catch (error) {
     log.fatal(error, "Error caught inside run func.");
   }
