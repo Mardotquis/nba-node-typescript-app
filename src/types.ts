@@ -23,3 +23,11 @@ export interface IPlayByPlayEvents {
   gid: string;
   pla: IPlayByPlayEvent[];
 }
+
+export interface IPlayerEvents {
+  [pid: string]: IPlayByPlayEvent[];
+}
+
+export type GroupedEvents = Omit<IPlayByPlayEvents, "pla"> & {
+  playerEvents: IPlayerEvents;
+};

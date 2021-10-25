@@ -14,3 +14,16 @@ export const combinePlayByPlayEvents = (
 
   return { gid, pla: events };
 };
+
+// sort an array of objects by a key
+export const sortBy = (arr: any[], key: string) => {
+  return arr.sort((firstElement, secondElement) => {
+    if (firstElement[key] < secondElement[key]) {
+      return -1;
+    }
+    if (firstElement[key] > secondElement[key]) {
+      return 1;
+    }
+    return 0;
+  });
+};
