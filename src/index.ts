@@ -149,14 +149,28 @@ const groupPlayerEvents = (
   return { gid: playByPlayEvents.gid, playerEvents };
 };
 
-const run = async () => {
-  const gameId = getGameID();
-  if (!gameId) {
-    log.fatal("No gameID provided. Ending now...");
-    return;
-  }
+const writePlayerEvents = (events: GroupedEvents) => {
+  const { gid } = events;
+  const fileName = `player-events-${gid}.json`;
 
+  fs.writeFile(fileName, JSON.stringify(events), (err) => {
+    if (err) {
+      log.error(err, `Error while writing to file '${fileName}'`);
+    }
+
+    log.info(
+      `Successfully wrote events for game '${gid}' to file '${fileName}'.`
+    );
+  });
+};
+
+const run = async () => {
   try {
+    const gameId = getGameID();
+    if (!gameId) {
+      log.fatal("No gameID provided. Ending now...");
+      return;
+    }
     const gameDetails = await getGameDetails(gameId);
     if (gameDetails instanceof Error) {
       log.fatal(gameDetails, "Unable to fetch game details. Ending now...");
@@ -173,8 +187,10 @@ const run = async () => {
     }
 
     const groupedEvents = groupPlayerEvents(playByPlayEvents);
+
+    writePlayerEvents(groupedEvents);
   } catch (error) {
-    log.fatal(error, "Error caught inside run func.");
+    log.fatal(error, "Error caught inside game-cli.");
   }
 };
 
