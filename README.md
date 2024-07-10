@@ -1,6 +1,4 @@
-# NODE TYPESCRIPT EVAL
-
-Please follow the instructions below and complete the work to the best of your ability using [TypeScript](https://www.typescriptlang.org).
+Node.js + TypeScript CLI used to search NBA game details. This was originally an interview project.
 
 ## Set up
 
